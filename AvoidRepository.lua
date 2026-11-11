@@ -3,6 +3,7 @@ function A.Changed()
     if A.Refresh then A.Refresh() end
     if A.RefreshSocial then A.RefreshSocial() end
     if A.RefreshApplicants then A.RefreshApplicants() end
+    if A.RefreshBrowse then A.RefreshBrowse() end
 end
 function A.Save(oldKey, name, realm, reason, source, classToken, contactName, regionID)
     if A.locked then return nil, A.L.LOCKED end
@@ -21,7 +22,7 @@ function A.Save(oldKey, name, realm, reason, source, classToken, contactName, re
     if type(contactName)=='string' and A.Identity(contactName) then e.contactName=contactName end
     e.regionID=regionID or e.regionID
     A.db.entries[key]=e
-    if A.SyncIgnores then A.SyncIgnores() end
+    if A.SyncIgnores then A.SyncIgnores(e) end
     A.Changed()
     return e
 end

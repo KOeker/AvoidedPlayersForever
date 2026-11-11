@@ -39,6 +39,12 @@ function A.Split(text)
     local name, realm = A.Trim(text):match('^([^%-]+)%-(.+)$')
     return name or A.Trim(text), realm
 end
+function A.FullNameKey(text)
+    text=A.Plain(text,'string')
+    if not text then return nil end
+    local first,last=A.Trim(text):match('^([^%s%-]+)[%s%-]+([^%s%-]+)$')
+    if first and A.Identity(first,last) then return A.Fold(first..'-'..last) end
+end
 function A.SafeText(text) return (tostring(text or ''):gsub('|','||')) end
 function A.Display(e) return e.characterName .. (e.realm and '-' .. e.realm or ' (?)') end
 function A.UnitIdentity(unit)

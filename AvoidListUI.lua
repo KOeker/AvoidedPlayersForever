@@ -25,7 +25,7 @@ local function frame(name,title,w,h)
     UISpecialFrames[#UISpecialFrames+1]=name
     return f
 end
-function A.OpenReason(name,realm,classToken,contactName,regionID)
+function A.OpenReason(name,realm,classToken,contactName,regionID,source,onSaved)
     if A.locked then A.Say(L.LOCKED); return end
     name,realm=A.Identity(name,realm)
     if not name then return end
@@ -41,11 +41,18 @@ function A.OpenReason(name,realm,classToken,contactName,regionID)
         dialog.reason:SetScript('OnEscapePressed',function() dialog:Hide() end)
         dialog.error=A.Label(dialog,'',24,-220,460); dialog.error:SetTextColor(1,0.35,0.25)
         A.Button(dialog,L.SAVE,24,-294,210,function()
-            local e,err=A.Save(nil,dialog.characterName,dialog.characterRealm,dialog.reason:GetText(),'contextMenu',dialog.classToken,dialog.contactName,dialog.regionID)
-            if e then dialog:Hide() else dialog.error:SetText(err) end
+            local e,err=A.Save(nil,dialog.characterName,dialog.characterRealm,dialog.reason:GetText(),dialog.source,dialog.classToken,dialog.contactName,dialog.regionID)
+            if e then
+                local callback=dialog.onSaved
+                dialog:Hide()
+                if callback then callback() end
+            else
+                dialog.error:SetText(err)
+            end
         end)
         A.Button(dialog,L.CANCEL,266,-294,210,function() dialog:Hide() end)
     end
+    dialog.source,dialog.onSaved=source or 'contextMenu',onSaved
     dialog.characterName,dialog.characterRealm=name,realm
     dialog.classToken,dialog.contactName,dialog.regionID=classToken,contactName,regionID
     dialog.identity:SetText(A.SafeText(A.Display({characterName=name,realm=realm})))

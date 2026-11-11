@@ -14,11 +14,14 @@ end
 function A.RefreshSocial()
     if not panel or not panel:IsShown() then return end
     local width=math.max(250,panel:GetWidth()-36)
-    local visible=math.max(0,math.min(12,math.floor((panel:GetHeight()-180)/56)))
+    local visible=math.max(0,math.min(12,math.floor((panel:GetHeight()-244)/56)))
     local count=math.max(1,visible)
     local items=A.List(search:GetText())
     local pages=math.max(1,math.ceil(#items/count)); page=math.min(page,pages)
     search:SetWidth(width-12); status:SetWidth(width)
+    local fieldWidth=(width-72)/2
+    panel.firstName:SetWidth(fieldWidth)
+    panel.lastName:SetWidth(fieldWidth)
     for _,control in pairs(panel.controls) do
         control:SetChecked(A.db.settings[control.setting])
         control.label:SetWidth(width-30)
@@ -33,9 +36,6 @@ function A.RefreshSocial()
             row:SetWidth(width)
             row.name:SetText(A.SafeText(A.Display(e))); row.name:SetWidth(width-86)
             row.reason:SetText(A.SafeText(e.reason:gsub('[\r\n]',' '))); row.reason:SetWidth(width-86)
-            local coords=e.classToken and CLASS_ICON_TCOORDS and CLASS_ICON_TCOORDS[e.classToken]
-            row.icon:SetTexture(coords and 'Interface\\GLUES\\CHARACTERCREATE\\UI-CHARACTERCREATE-CLASSES' or 'Interface\\Icons\\INV_Misc_QuestionMark')
-            if coords then row.icon:SetTexCoord(unpack(coords)) else row.icon:SetTexCoord(0,1,0,1) end
         end
     end
 end
@@ -51,22 +51,62 @@ local function createPanel(parent)
         c:SetChecked(A.db.settings[setting])
         c:SetScript('OnClick',function(self)
             A.Click(); A.db.settings[setting]=not not self:GetChecked()
-            A.RefreshApplicants(); A.RefreshSocial()
+            A.Changed()
         end)
         panel.controls[setting]=c
     end
     option('hideApplicants',L.HIDE_APPLICANTS,-8)
-    panel.searchLabel=A.Label(panel,L.SEARCH,18,-64,350)
+    local function nameField(label)
+        local input=CreateFrame('EditBox',nil,panel,'InputBoxTemplate')
+        input:SetSize(132,26); input:SetAutoFocus(false); input:SetMaxBytes(120)
+        A.Label(input,label,0,21,132)
+        input:SetScript('OnEscapePressed',function(self) self:ClearFocus() end)
+        return input
+    end
+    local first,last=nameField(L.FIRST_NAME),nameField(L.LAST_NAME)
+    panel.firstName,panel.lastName=first,last
+    first:SetPoint('TOPLEFT',24,-80)
+    last:SetPoint('LEFT',first,'RIGHT',14,0)
+    local function addPlayer()
+        if A.locked then A.Say(L.LOCKED); return end
+        local name,surname=A.Identity(first:GetText(),last:GetText())
+        if not surname or name:find('[%s%-]') or surname:find('[%s%-]') then
+            A.Say(L.FULL_NAME_REQUIRED)
+            return
+        end
+        local contact=name..'-'..surname
+        if A.FindAvoidedContact(contact) or A.db.entries[A.Key(name,surname)] then
+            A.Say(L.ALREADY_AVOIDED)
+            return
+        end
+        A.OpenReason(name,surname,nil,contact,A.CurrentRegion(),'manual',function()
+            first:SetText(''); last:SetText('')
+            page=1; search:SetText('')
+            A.RefreshSocial()
+        end)
+    end
+    local add=A.Button(panel,'+',0,0,34,addPlayer)
+    add:ClearAllPoints(); add:SetPoint('LEFT',last,'RIGHT',12,0)
+    add:SetScript('OnEnter',function(self)
+        GameTooltip:SetOwner(self,'ANCHOR_RIGHT'); GameTooltip:SetText(L.ADD); GameTooltip:Show()
+    end)
+    add:SetScript('OnLeave',function() GameTooltip:Hide() end)
+    first:SetScript('OnTabPressed',function() last:SetFocus() end)
+    last:SetScript('OnTabPressed',function() first:SetFocus() end)
+    first:SetScript('OnEnterPressed',function() last:SetFocus() end)
+    last:SetScript('OnEnterPressed',function() A.Click(); addPlayer() end)
+    panel.searchLabel=A.Label(panel,L.SEARCH,18,-128,350)
     search=CreateFrame('EditBox',nil,panel,'InputBoxTemplate')
-    search:SetPoint('TOPLEFT',24,-86); search:SetSize(340,26)
+    search:SetPoint('TOPLEFT',24,-150); search:SetSize(340,26)
     search:SetAutoFocus(false); search:SetMaxBytes(200)
     search:SetScript('OnTextChanged',function() page=1; A.RefreshSocial() end)
     search:SetScript('OnEscapePressed',function() search:ClearFocus() end)
-    status=A.Label(panel,'',18,-126,350); status:SetHeight(40); status:SetJustifyV('TOP')
+    status=A.Label(panel,'',18,-190,350); status:SetHeight(40); status:SetJustifyV('TOP')
     for i=1,12 do
         local row=CreateFrame('Frame',nil,panel)
-        row:SetPoint('TOPLEFT',18,-148-(i-1)*56); row:SetSize(350,48); row:EnableMouse(true); row:Hide()
+        row:SetPoint('TOPLEFT',18,-212-(i-1)*56); row:SetSize(350,48); row:EnableMouse(true); row:Hide()
         row.icon=row:CreateTexture(nil,'ARTWORK'); row.icon:SetSize(32,32); row.icon:SetPoint('LEFT',0,0)
+        row.icon:SetAtlas('socialqueuing-icon-group',false)
         row.name=A.Label(row,'',44,-4,260); row.name:SetHeight(18)
         row.reason=A.Label(row,'',44,-24,260); row.reason:SetHeight(18); row.reason:SetJustifyV('TOP')
         row.remove=CreateFrame('Button',nil,row,'UIPanelCloseButton')
