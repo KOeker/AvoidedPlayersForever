@@ -1,0 +1,11 @@
+.DS_Store
+Thumbs.db
+Desktop.ini
+/.idea/
+/.vscode/
+/.codegraph/
+/.apf-test-tools/
+__pycache__/
+*.log
+*.tmp
+*.zip
