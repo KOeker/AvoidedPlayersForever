@@ -22,7 +22,7 @@ A.locales = {enUS = {
     NOT_FOUND='No exact entry found. Use the list for entries without a realm.',
     CAPABILITIES='O: side tab on compatible Social UI. Hiding Blizzard LFG results is unavailable.',
     DATE='Created', UPDATE='Updated', SETTINGS='Settings', PAGE='Page %d / %d', SOURCE='Source',
-    HIDE_APPLICANTS='Hide avoided Group Finder entries (off: mark red)',
+    HIDE_ENTRY='Hide this player in Group Finder (off: mark red)',
     IGNORE_INFO='Avoid uses the native WoW Ignore list for whispers and group invitations. Other messages are also affected. Your avoid notes are account-wide.',
     IGNORE_UNAVAILABLE='WoW Ignore APIs are unavailable. Blocking cannot be confirmed.',
     IGNORE_RELEASE_FAILED='WoW could not remove the Ignore entry. The avoid entry was kept; try again outside combat.',

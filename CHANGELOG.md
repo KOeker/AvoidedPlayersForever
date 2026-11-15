@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.3
+
+- Choose whether to hide or mark each avoided player in the reason dialog or from the social tab.
+- Carry the previous Group Finder setting over to existing entries.
+
 ## 0.2.2
 
 - Add players by first and last name from the social tab.

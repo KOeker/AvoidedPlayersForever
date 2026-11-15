@@ -10,6 +10,7 @@ function A.InitDB(db)
             or (owned.regionID~=nil and type(owned.regionID)~='number')
             or (owned.owner~=nil and type(owned.owner)~='string') then return nil end
     end
+    local hideByDefault = not db.settings or db.settings.hideApplicants~=false
     local entries = {}
     for _, e in pairs(db.entries or {}) do
         if type(e)~='table' or type(e.reason)~='string' or #e.reason>500 or A.Trim(e.reason)=='' then return nil end
@@ -21,6 +22,8 @@ function A.InitDB(db)
         entries[key] = {key=key,characterName=name,realm=realm,reason=e.reason,
             createdAt=e.createdAt or time(),updatedAt=e.updatedAt or e.createdAt or time(),
             source=e.source=='contextMenu' and 'contextMenu' or 'manual'}
+        entries[key].hideFromGroupFinder=e.hideFromGroupFinder
+        if type(e.hideFromGroupFinder)~='boolean' then entries[key].hideFromGroupFinder=hideByDefault end
         entries[key].classToken=A.ClassToken(e.classToken)
         entries[key].contactName=type(e.contactName)=='string' and A.Identity(e.contactName) and e.contactName or nil
         entries[key].regionID=type(e.regionID)=='number' and e.regionID or nil
@@ -29,7 +32,7 @@ function A.InitDB(db)
     db.ignoreOwned=db.ignoreOwned or {}
     db.settings.warnGroup=false
     db.settings.warnLFG=false
-    if db.settings.hideApplicants==nil then db.settings.hideApplicants=true end
+    db.settings.hideApplicants=nil
     db.settings.social=nil
     db.settings.hideBlizzardLFG=false
     A.db, A.locked = db, false

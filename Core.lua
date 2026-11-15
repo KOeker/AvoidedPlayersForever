@@ -34,7 +34,7 @@ events:SetScript('OnEvent',function(_,event,name,...)
     if event=='PARTY_INVITE_REQUEST' then declineAvoidedInvite(name,select(7,...)) end
     if event=='PLAYER_REGEN_ENABLED' then A.RefreshBrowse() end
     if event=='PLAYER_ENTERING_WORLD' or event=='PLAYER_REGEN_ENABLED' or event=='IGNORELIST_UPDATE' then A.SyncIgnores() end
-    if event=='PLAYER_LOGIN' then A.Say(string.format(A.L.LOADED,'0.2.2')) end
+    if event=='PLAYER_LOGIN' then A.Say(string.format(A.L.LOADED,'0.2.3')) end
     if event=='LFG_LIST_APPLICANT_LIST_UPDATED' or event=='LFG_LIST_APPLICANT_UPDATED' or event=='PLAYER_REGEN_ENABLED' then
         A.RefreshApplicants()
     end

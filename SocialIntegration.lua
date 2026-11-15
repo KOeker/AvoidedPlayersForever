@@ -14,7 +14,7 @@ end
 function A.RefreshSocial()
     if not panel or not panel:IsShown() then return end
     local width=math.max(250,panel:GetWidth()-36)
-    local visible=math.max(0,math.min(12,math.floor((panel:GetHeight()-244)/56)))
+    local visible=math.max(0,math.min(12,math.floor((panel:GetHeight()-196)/56)))
     local count=math.max(1,visible)
     local items=A.List(search:GetText())
     local pages=math.max(1,math.ceil(#items/count)); page=math.min(page,pages)
@@ -22,10 +22,6 @@ function A.RefreshSocial()
     local fieldWidth=(width-72)/2
     panel.firstName:SetWidth(fieldWidth)
     panel.lastName:SetWidth(fieldWidth)
-    for _,control in pairs(panel.controls) do
-        control:SetChecked(A.db.settings[control.setting])
-        control.label:SetWidth(width-30)
-    end
     status:SetText(A.locked and L.LOCKED or (#items==0 and L.EMPTY or ''))
     counter:SetText(string.format(L.PAGE,page,pages))
     for i,row in ipairs(rows) do
@@ -34,8 +30,9 @@ function A.RefreshSocial()
         row.entry=e; row:SetShown(e~=nil)
         if e then
             row:SetWidth(width)
-            row.name:SetText(A.SafeText(A.Display(e))); row.name:SetWidth(width-86)
-            row.reason:SetText(A.SafeText(e.reason:gsub('[\r\n]',' '))); row.reason:SetWidth(width-86)
+            row.hideFromGroupFinder:SetChecked(e.hideFromGroupFinder)
+            row.name:SetText(A.SafeText(A.Display(e))); row.name:SetWidth(width-110)
+            row.reason:SetText(A.SafeText(e.reason:gsub('[\r\n]',' '))); row.reason:SetWidth(width-110)
         end
     end
 end
@@ -43,19 +40,6 @@ local function createPanel(parent)
     panel=CreateFrame('Frame',nil,parent)
     panel:SetPoint('TOPLEFT',parent.BattleNetBar,'BOTTOMLEFT',0,5)
     panel:SetPoint('BOTTOMRIGHT',parent,'BOTTOMRIGHT',-2,2); panel:Hide()
-    panel.controls={}
-    local function option(setting,label,y)
-        local c=CreateFrame('CheckButton',nil,panel,'UICheckButtonTemplate')
-        c:SetPoint('TOPLEFT',16,y); c:SetSize(26,26); c.setting=setting
-        c.label=A.Label(panel,label,48,y-4,320); c.label:SetHeight(32); c.label:SetJustifyV('TOP')
-        c:SetChecked(A.db.settings[setting])
-        c:SetScript('OnClick',function(self)
-            A.Click(); A.db.settings[setting]=not not self:GetChecked()
-            A.Changed()
-        end)
-        panel.controls[setting]=c
-    end
-    option('hideApplicants',L.HIDE_APPLICANTS,-8)
     local function nameField(label)
         local input=CreateFrame('EditBox',nil,panel,'InputBoxTemplate')
         input:SetSize(132,26); input:SetAutoFocus(false); input:SetMaxBytes(120)
@@ -65,7 +49,7 @@ local function createPanel(parent)
     end
     local first,last=nameField(L.FIRST_NAME),nameField(L.LAST_NAME)
     panel.firstName,panel.lastName=first,last
-    first:SetPoint('TOPLEFT',24,-80)
+    first:SetPoint('TOPLEFT',24,-32)
     last:SetPoint('LEFT',first,'RIGHT',14,0)
     local function addPlayer()
         if A.locked then A.Say(L.LOCKED); return end
@@ -95,16 +79,16 @@ local function createPanel(parent)
     last:SetScript('OnTabPressed',function() first:SetFocus() end)
     first:SetScript('OnEnterPressed',function() last:SetFocus() end)
     last:SetScript('OnEnterPressed',function() A.Click(); addPlayer() end)
-    panel.searchLabel=A.Label(panel,L.SEARCH,18,-128,350)
+    panel.searchLabel=A.Label(panel,L.SEARCH,18,-80,350)
     search=CreateFrame('EditBox',nil,panel,'InputBoxTemplate')
-    search:SetPoint('TOPLEFT',24,-150); search:SetSize(340,26)
+    search:SetPoint('TOPLEFT',24,-102); search:SetSize(340,26)
     search:SetAutoFocus(false); search:SetMaxBytes(200)
     search:SetScript('OnTextChanged',function() page=1; A.RefreshSocial() end)
     search:SetScript('OnEscapePressed',function() search:ClearFocus() end)
-    status=A.Label(panel,'',18,-190,350); status:SetHeight(40); status:SetJustifyV('TOP')
+    status=A.Label(panel,'',18,-142,350); status:SetHeight(40); status:SetJustifyV('TOP')
     for i=1,12 do
         local row=CreateFrame('Frame',nil,panel)
-        row:SetPoint('TOPLEFT',18,-212-(i-1)*56); row:SetSize(350,48); row:EnableMouse(true); row:Hide()
+        row:SetPoint('TOPLEFT',18,-164-(i-1)*56); row:SetSize(350,48); row:EnableMouse(true); row:Hide()
         row.icon=row:CreateTexture(nil,'ARTWORK'); row.icon:SetSize(32,32); row.icon:SetPoint('LEFT',0,0)
         row.icon:SetAtlas('socialqueuing-icon-group',false)
         row.name=A.Label(row,'',44,-4,260); row.name:SetHeight(18)
@@ -115,6 +99,21 @@ local function createPanel(parent)
             A.Click()
             if row.entry then local ok,err=A.Remove(row.entry.key); if not ok and err then A.Say(err) end end
         end)
+        local hide=CreateFrame('CheckButton',nil,row,'UICheckButtonTemplate')
+        row.hideFromGroupFinder=hide
+        hide:SetSize(24,24); hide:SetPoint('RIGHT',row.remove,'LEFT',-5,0)
+        hide:SetScript('OnClick',function(self)
+            if A.locked or not row.entry then return end
+            A.Click()
+            row.entry.hideFromGroupFinder=not not self:GetChecked()
+            A.Changed()
+        end)
+        hide:SetScript('OnEnter',function(self)
+            GameTooltip:SetOwner(self,'ANCHOR_RIGHT')
+            GameTooltip:SetText(L.HIDE_ENTRY)
+            GameTooltip:Show()
+        end)
+        hide:SetScript('OnLeave',function() GameTooltip:Hide() end)
         local function tooltip()
             if not row.entry then return end
             GameTooltip:SetOwner(row,'ANCHOR_RIGHT')

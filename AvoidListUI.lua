@@ -39,9 +39,14 @@ function A.OpenReason(name,realm,classToken,contactName,regionID,source,onSaved)
         dialog.reason:SetAutoFocus(false); dialog.reason:SetMultiLine(true); dialog.reason:SetMaxBytes(500)
         dialog.reason:SetFontObject(ChatFontNormal); dialog.reason:SetTextInsets(6,6,4,4)
         dialog.reason:SetScript('OnEscapePressed',function() dialog:Hide() end)
-        dialog.error=A.Label(dialog,'',24,-220,460); dialog.error:SetTextColor(1,0.35,0.25)
+        dialog.hideFromGroupFinder=CreateFrame('CheckButton',nil,dialog,'UICheckButtonTemplate')
+        dialog.hideFromGroupFinder:SetPoint('TOPLEFT',24,-212)
+        dialog.hideFromGroupFinder:SetSize(26,26)
+        dialog.hideFromGroupFinder:SetScript('OnClick',A.Click)
+        A.Label(dialog,L.HIDE_ENTRY,56,-218,425)
+        dialog.error=A.Label(dialog,'',24,-252,460); dialog.error:SetTextColor(1,0.35,0.25)
         A.Button(dialog,L.SAVE,24,-294,210,function()
-            local e,err=A.Save(nil,dialog.characterName,dialog.characterRealm,dialog.reason:GetText(),dialog.source,dialog.classToken,dialog.contactName,dialog.regionID)
+            local e,err=A.Save(nil,dialog.characterName,dialog.characterRealm,dialog.reason:GetText(),dialog.source,dialog.classToken,dialog.contactName,dialog.regionID,dialog.hideFromGroupFinder:GetChecked() and true or false)
             if e then
                 local callback=dialog.onSaved
                 dialog:Hide()
@@ -56,6 +61,8 @@ function A.OpenReason(name,realm,classToken,contactName,regionID,source,onSaved)
     dialog.characterName,dialog.characterRealm=name,realm
     dialog.classToken,dialog.contactName,dialog.regionID=classToken,contactName,regionID
     dialog.identity:SetText(A.SafeText(A.Display({characterName=name,realm=realm})))
+    local entry=A.db.entries[A.Key(name,realm)]
+    dialog.hideFromGroupFinder:SetChecked(not entry or entry.hideFromGroupFinder)
     dialog.reason:SetText(''); dialog.error:SetText(''); dialog:Show(); dialog.reason:SetFocus()
 end
 function A.Open()

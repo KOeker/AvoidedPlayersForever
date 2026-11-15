@@ -5,7 +5,7 @@ function A.Changed()
     if A.RefreshApplicants then A.RefreshApplicants() end
     if A.RefreshBrowse then A.RefreshBrowse() end
 end
-function A.Save(oldKey, name, realm, reason, source, classToken, contactName, regionID)
+function A.Save(oldKey, name, realm, reason, source, classToken, contactName, regionID, hideFromGroupFinder)
     if A.locked then return nil, A.L.LOCKED end
     name, realm = A.Identity(name, realm)
     reason = A.Trim(reason)
@@ -18,6 +18,11 @@ function A.Save(oldKey, name, realm, reason, source, classToken, contactName, re
     e = e or {createdAt=time(),source=source=='contextMenu' and 'contextMenu' or 'manual'}
     if oldKey and oldKey~=key then A.db.entries[oldKey]=nil end
     e.key,e.characterName,e.realm,e.reason,e.updatedAt=key,name,realm,reason,time()
+    if hideFromGroupFinder~=nil then
+        e.hideFromGroupFinder=not not hideFromGroupFinder
+    elseif e.hideFromGroupFinder==nil then
+        e.hideFromGroupFinder=true
+    end
     e.classToken=A.ClassToken(classToken) or e.classToken
     if type(contactName)=='string' and A.Identity(contactName) then e.contactName=contactName end
     e.regionID=regionID or e.regionID

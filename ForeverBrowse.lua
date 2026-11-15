@@ -44,7 +44,8 @@ end
 local function mark(row)
     if A.locked or inCombat() or row:IsProtected() then return end
     local id=A.Plain(row.resultID,'number')
-    local entry=id and not A.db.settings.hideApplicants and readResult(id)
+    local entry=id and readResult(id)
+    if entry and entry.hideFromGroupFinder then entry=nil end
     local markState=marks[row]
     if not markState and entry then
         markState={edges={
@@ -56,7 +57,7 @@ local function mark(row)
         marks[row]=markState
         row:HookScript('OnEnter',function(self)
             local current=marks[self]
-            if A.locked or inCombat() or A.db.settings.hideApplicants or not current.entry
+            if A.locked or inCombat() or not current.entry or current.entry.hideFromGroupFinder
                 or A.Plain(self.resultID,'number')~=current.id then return end
             if not tooltip then
                 tooltip=CreateFrame('GameTooltip','AvoidedPlayersForeverBrowseTooltip',UIParent,'GameTooltipTemplate')
@@ -80,7 +81,8 @@ local function copyVisible(from,to,previous)
     for _,node in ipairs(from:GetNodes()) do
         local data=A.Plain(node.data,'table')
         if not data then error('Unreadable Group Finder row') end
-        if readResult(data.resultID) then
+        local entry=readResult(data.resultID)
+        if entry and entry.hideFromGroupFinder then
             removed=true
         else
             local child=to:Insert(data)
@@ -107,7 +109,7 @@ local function refresh()
     local current=scroll:GetDataProvider()
     if current~=filtered then source=current; filtered=nil end
     local target=source
-    if source and A.db.settings.hideApplicants and type(source.GetRootNode)=='function' then
+    if source and type(source.GetRootNode)=='function' then
         local replacement=CreateTreeDataProvider()
         local previous={}
         if filtered then rememberNodes(filtered:GetRootNode(),previous) end

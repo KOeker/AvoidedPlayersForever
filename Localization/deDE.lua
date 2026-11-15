@@ -22,7 +22,7 @@ A.locales.deDE = {
     NOT_FOUND='Kein exakter Eintrag gefunden. Verwende für Einträge ohne Realm die Liste.',
     CAPABILITIES='O: seitlicher Avoid-Reiter bei kompatibler Social UI. Blizzard-LFG-Ausblenden nicht verfügbar.',
     DATE='Erstellt', UPDATE='Geändert', SETTINGS='Einstellungen', PAGE='Seite %d / %d', SOURCE='Quelle',
-    HIDE_APPLICANTS='Vermiedene Einträge in der Gruppensuche ausblenden (aus: rot markieren)',
+    HIDE_ENTRY='Diesen Spieler in der Gruppensuche ausblenden (aus: rot markieren)',
     IGNORE_INFO='Avoid nutzt WoW-Ignore für Flüstern und Gruppeneinladungen. Weitere Nachrichten sind ebenfalls betroffen. Deine Avoid-Notizen bleiben accountweit.',
     IGNORE_UNAVAILABLE='WoW-Ignore-APIs fehlen. Die Sperrwirkung ist nicht bestätigt.',
     IGNORE_RELEASE_FAILED='WoW konnte den Ignore-Eintrag nicht entfernen. Der Avoid-Eintrag bleibt erhalten; außerhalb des Kampfes erneut versuchen.',

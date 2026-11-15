@@ -3,7 +3,7 @@
 ## Author: KOeker
 ## IconTexture: Interface\AddOns\AvoidedPlayersForever\Media\Icon
 ## Notes: Account-wide avoid notes, native WoW Ignore and local applicant filtering.
-## Version: 0.2.2
+## Version: 0.2.3
 ## SavedVariables: AvoidedPlayersForeverDB
 ## X-License: MIT
 
